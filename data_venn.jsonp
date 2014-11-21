@@ -1,0 +1,13 @@
+var sets = [
+         {"label": "Circle A", "size": 300},
+         {"label": "Circle B", "size": 300},
+         {"label": "Circle C", "size": 300},
+    ],
+
+    overlaps = [
+         {"sets": [0, 1], "size": 100},
+         {"sets": [0, 2], "size": 100},
+		 {"sets": [1, 2], "size": 99},
+		 {"sets": [0, 1, 2], "size": 50},
+
+	];
