@@ -14,10 +14,10 @@ path {
 	<button id="save">Save as Image</button>
 
 	<p>PNG</p>
-	<div id="pngdataurl"></div>
+	<!--<div id="pngdataurl"></div>-->
 
 
-	<canvas width="900" height="500" style="display:none"></canvas>
+	<canvas width="900" height="500" style="display:none"></canvas> <!-- TODO: récupérer les hauteur/largeur du svg à générer -->
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
@@ -67,7 +67,7 @@ svg.selectAll("path")
 // COPY
 
 d3.select("#save").on("click", function(){
-  var html = d3.select("svg")
+  var html = d3.select("svg") // TODO récupérer le nom du SVG (courant?)
         .attr("version", 1.1)
         .attr("xmlns", "http://www.w3.org/2000/svg")
         .node().parentNode.innerHTML;
@@ -75,9 +75,9 @@ d3.select("#save").on("click", function(){
   //console.log(html);
   var imgsrc = 'data:image/svg+xml;base64,'+ btoa(html);
   var img = '<img src="'+imgsrc+'">';
-  d3.select("#svg").append("svg")
+  d3.select("#svg").append("svg") // TODO récupérer le nom du SVG (courant?)
     .attr("id", "png")
-  d3.select("#svg").html(img);
+  d3.select("#svg").html(img); // TODO récupérer le nom du SVG (courant?)
 
 	var canvas = document.querySelector("canvas"),
 	    context = canvas.getContext("2d");
@@ -91,7 +91,7 @@ d3.select("#save").on("click", function(){
     binaryblob();
 
 	  var a = document.createElement("a");
-	  a.download = "sample.png";
+	  a.download = "sample.png"; // TODO: remplacer sample par nom du container ou nom du dataset.csv
 	  a.href = canvas.toDataURL("image/png");
 
 	   var pngimg = '<img src="'+a.href+'">'; 
