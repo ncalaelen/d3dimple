@@ -95,7 +95,7 @@ d3.select("#save").on("click", function(){
 	  a.href = canvas.toDataURL("image/png");
 
 	   var pngimg = '<img src="'+a.href+'">'; 
-  	   d3.select("#pngdataurl").html(pngimg);
+  	   d3.select("#png").html(pngimg);
 
 	  a.click();
 	};
