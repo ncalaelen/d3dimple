@@ -20,6 +20,7 @@ path {
 	<canvas width="900" height="500" style="display:none"></canvas> <!-- TODO: récupérer les hauteur/largeur du svg à générer -->
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="html2canvas.js"
 <script>
 
 var width = 960,
@@ -65,7 +66,7 @@ svg.selectAll("path")
 </script>
 
 // COPY
-<button>save it</button>
+<button onclick="html2canvas()">save it</button>
 <script type="text/javascript">
 html2canvas(document.body, {
   onrendered: function(canvas) {
