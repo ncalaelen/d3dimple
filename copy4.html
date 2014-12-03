@@ -69,7 +69,7 @@ svg.selectAll("path")
 <button onclick="html2canvas()">save it</button>
 <script type="text/javascript">
 html2canvas(document.body, {
-  onclick: function(canvas) {
+  onrendered: function(canvas) {
     document.body.appendChild(canvas);
   }
 });
