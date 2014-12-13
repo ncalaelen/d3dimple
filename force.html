@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <title>ShowCase Dimple</title>
+		<link href="../_design/bootstrap.min.css" rel="stylesheet" type"text/css">
+		<link href="../_design/layout.css" rel="stylesheet" type="text/css">
+		<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+		<script type="text/javascript" src="../_scripts/jquery-2.1.1.min.js"></script>
+        <!-- <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+        <script type="text/javascript" src="http://dimplejs.org/dist/dimple.v2.1.0.min.js"></script> -->
+        <script type="text/javascript" src="../_scripts/bootstrap.min.js"></script>
+        <script type="text/javascript" src="../_scripts/d3.min.js"></script>
+        <script type="text/javascript" src="../_scripts/dimple.js"></script>
+		<script type="text/javascript" src="../_scripts/nbelnet.js"></script>
+		<script type="text/javascript" src="../_scripts/sankey.js"></script>
+		<script type="text/javascript" src="../_scripts/specialCharts.js"></script>
+		<script type="text/javascript" src="../_scripts/base64.js"></script>
+	
+	<style type="text/css">
+<style>
+   #chart {
+    height: 600px;
+   }
+   .node rect {
+    cursor: move;
+    fill-opacity: .9;
+    shape-rendering: crispEdges;
+   }
+   .node text {
+    pointer-events: none;
+    text-shadow: 0 1px 0 #fff;
+   }
+   .link {
+    fill: none;
+    stroke: #000;
+    stroke-opacity: .2;
+   }
+   .link:hover {
+    stroke-opacity: .5;
+   }
+
+   circle.node-dot {
+    fill: DarkSlateGray;
+    stroke: SlateGray;
+    stroke-width: 1px;
+   }
+
+
+   path.link {
+    fill: none;
+    stroke: SlateGray;
+    stroke-width: 1.5px;
+   }
+
+   marker#defaultMarker {
+    fill: SlateGray;
+   }
+
+   path.link.defaultMarker {
+    stroke: SlateGray;
+   }
+
+   circle {
+    fill: #ccc;
+    stroke: #333;
+    stroke-width: 1.5px;
+   }
+
+   text {
+    pointer-events: none;
+   }
+
+   text.shadow {
+    stroke: #fff;
+    stroke-width: 3px;
+    stroke-opacity: .8;
+   }
+
+   marker#direct{fill:green;}
+ marker#bus{fill:blue;}
+ marker#manual{fill:red;}
+ path.link.direct{stroke:green;  }
+ path.link.bus{stroke:blue;} 
+path.link.manual{stroke:red;stroke-dasharray: 0, 2 1;} 
+
+	</style>	
+    </head>
+
+<body>
+	<!-- Header
+	=========== -->
+	<div class="page-header"> <!-- \ header -->
+	<h1>ma page</h1>
+	</div><!-- / header -->
+	
+	<!-- Left nav bar
+	================= -->
+	<div class="row"> <!-- / whole -->
+		<div class="menunav col-md-1">
+		menu nav
+		</div>
+		
+		<!-- Content 
+		============ -->
+		<div class="col-md-11" id="myContent">	
+		</div>  <!-- / content -->
+	</div>  <!-- \ whole -->
+	<!-- javascript -->
+	<script type="text/javascript">
+	/**
+	pageName = "force";
+	configFile = "config_force.csv";
+	modeLayout = "auto"; // "manual", "auto"
+	specialCharts = "yes"; // "yes", "no"
+	chefOrchestre(configFile, modeLayout, pageName, specialCharts);
+	**/
+
+
+  /**
+    * do the force vizualization
+    * @param {string} divName name of the div to hold the tree
+    * @param {object} inData the source data
+    */
+   function doTheTreeViz(divName, inData) {
+    // tweak the options
+    var options = $.extend({
+     stackHeight : 12,
+     radius : 5,
+     fontSize : 12,
+     labelFontSize : 8,
+     nodeLabel : null,
+     markerWidth : 0,
+     markerHeight : 0,
+     width : $(divName).outerWidth(),
+     gap : 1.5,
+     nodeResize : "",
+     linkDistance : 30,
+     charge : -120,
+     styleColumn : null,
+     styles : null,
+     linkName : null,
+     height : $(divName).outerHeight()
+    }, inData.d3.options);
+    // set up the parameters
+    options.gap = options.gap * options.radius;
+    var width = options.width;
+    var height = options.height;
+    var data = inData.d3.data;
+    var nodes = data.nodes;
+    var links = data.links;
+    var color = d3.scale.category20();
+
+    var force = d3.layout.force().nodes(nodes).links(links).size([width, height]).linkDistance(options.linkDistance).charge(options.charge).on("tick", tick).start();
+
+    var svg = d3.select(divName).append("svg:svg").attr("width", width).attr("height", height);
+
+    // get list of unique values in stylecolumn
+    linkStyles = [];
+    if (options.styleColumn) {
+     var x;
+     for (var i = 0; i < links.length; i++) {
+      if (linkStyles.indexOf( x = links[i][options.styleColumn].toLowerCase()) == -1)
+       linkStyles.push(x);
+     }
+    } else
+     linkStyles[0] = "defaultMarker";
+
+    // do we need a marker?
+
+    if (options.markerWidth) {
+     svg.append("svg:defs").selectAll("marker").data(linkStyles).enter().append("svg:marker").attr("id", String).attr("viewBox", "0 -5 10 10").attr("refX", 15).attr("refY", -1.5).attr("markerWidth", options.markerWidth).attr("markerHeight", options.markerHeight).attr("orient", "auto").append("svg:path").attr("d", "M0,-5L10,0L0,5");
+    }
+
+    var path = svg.append("svg:g").selectAll("path").data(force.links()).enter().append("svg:path").attr("class", function(d) {
+     return "link " + (options.styleColumn ? d[options.styleColumn].toLowerCase() : linkStyles[0]);
+    }).attr("marker-end", function(d) {
+     return "url(#" + (options.styleColumn ? d[options.styleColumn].toLowerCase() : linkStyles[0] ) + ")";
+    });
+
+    var circle = svg.append("svg:g").selectAll("circle").data(force.nodes()).enter().append("svg:circle").attr("r", function(d) {
+     return getRadius(d);
+    }).style("fill", function(d) {
+     return color(d.group);
+    }).call(force.drag);
+
+    if (options.nodeLabel) {
+     circle.append("title").text(function(d) {
+      return d[options.nodeLabel];
+     });
+    }
+    
+    if (options.linkName) {
+     path.append("title").text(function(d) {
+      return d[options.linkName];
+     });
+    }
+    var text = svg.append("svg:g").selectAll("g").data(force.nodes()).enter().append("svg:g");
+
+    // A copy of the text with a thick white stroke for legibility.
+    text.append("svg:text").attr("x", options.labelFontSize).attr("y", ".31em").attr("class", "shadow").text(function(d) {
+     return d[options.nodeLabel];
+    });
+
+    text.append("svg:text").attr("x", options.labelFontSize).attr("y", ".31em").text(function(d) {
+     return d[options.nodeLabel];
+    });
+    function getRadius(d) {
+     return options.radius * (options.nodeResize ? Math.sqrt(d[options.nodeResize]) / Math.PI : 1);
+    }
+
+    // Use elliptical arc path segments to doubly-encode directionality.
+    function tick() {
+     path.attr("d", function(d) {
+      var dx = d.target.x - d.source.x, dy = d.target.y - d.source.y, dr = Math.sqrt(dx * dx + dy * dy);
+      return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+     });
+
+     circle.attr("transform", function(d) {
+      return "translate(" + d.x + "," + d.y + ")";
+     });
+
+     text.attr("transform", function(d) {
+      return "translate(" + d.x + "," + d.y + ")";
+     });
+    }
+
+   }
+  </script><script> window['mcpherTreeData'] = {"d3":{"options":{"radius":6,"fontSize":30,"labelFontSize":8,"linkDistance":240,"charge":-900,"nodeLabel":"label","outerRadius":480,"markerHeight":6,"markerWidth":6,"styleColumn":"styleColumn","linkName":"linkName"},"data":{"nodes":[{"name":"1","count":5,"group":"business A","linkCount":5,"label":"System 1","shortName":"System 1"},{"name":"2","count":4,"group":"business A","linkCount":4,"label":"System 2","shortName":"System 2"},{"name":"4","count":4,"group":"business A","linkCount":4,"label":"System 4","shortName":"System 4"},{"name":"9","count":3,"group":"business A","linkCount":3,"label":"System 9","shortName":"System 9"},{"name":"6","count":4,"group":"business A","linkCount":4,"label":"System 6","shortName":"System 6"},{"name":"7","count":3,"group":"Business B","linkCount":3,"label":"System 7","shortName":"System 7"},{"name":"8","count":2,"group":"Business B","linkCount":2,"label":"System 8","shortName":"System 8"},{"name":"11","count":3,"group":"Business B","linkCount":3,"label":"System 11","shortName":"System 11"},{"name":"3","count":3,"group":"Business B","linkCount":3,"label":"System 3","shortName":"System 3"},{"name":"13","count":9,"group":"Business C","linkCount":9,"label":"System 13","shortName":"System 13"},{"name":"5","count":2,"group":"Business C","linkCount":2,"label":"System 5","shortName":"System 5"},{"name":"14","count":6,"group":"Business C","linkCount":6,"label":"System 14","shortName":"System 14"} ],"links":[{"source":0,"target":1,"depth":7,"count":1,"styleColumn":"bus","linkName":"System 1_System 2"},{"source":2,"target":1,"depth":7,"count":1,"styleColumn":"bus","linkName":"System 4_System 2"},{"source":3,"target":4,"depth":7,"count":1,"styleColumn":"bus","linkName":"System 9_System 6"},{"source":4,"target":5,"depth":7,"count":1,"styleColumn":"bus","linkName":"System 6_System 7"},{"source":4,"target":3,"depth":7,"count":1,"styleColumn":"bus","linkName":"System 6_System 9"},{"source":5,"target":0,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 7_System 1"},{"source":6,"target":0,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 8_System 1"},{"source":7,"target":1,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 11_System 2"},{"source":7,"target":8,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 11_System 3"},{"source":7,"target":2,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 11_System 4"},{"source":9,"target":0,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 13_System 1"},{"source":9,"target":1,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 13_System 2"},{"source":9,"target":8,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 13_System 3"},{"source":9,"target":2,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 13_System 4"},{"source":9,"target":10,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 13_System 5"},{"source":9,"target":5,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 13_System 7"},{"source":9,"target":6,"depth":7,"count":1,"styleColumn":"direct","linkName":"System 13_System 8"},{"source":9,"target":3,"depth":7,"count":1,"styleColumn":"manual","linkName":"System 13_System 9"},{"source":9,"target":11,"depth":7,"count":1,"styleColumn":"manual","linkName":"System 13_System 14"},{"source":11,"target":0,"depth":7,"count":1,"styleColumn":"manual","linkName":"System 14_System 1"},{"source":11,"target":8,"depth":7,"count":1,"styleColumn":"manual","linkName":"System 14_System 3"},{"source":11,"target":2,"depth":7,"count":1,"styleColumn":"manual","linkName":"System 14_System 4"},{"source":11,"target":10,"depth":7,"count":1,"styleColumn":"manual","linkName":"System 14_System 5"},{"source":11,"target":4,"depth":7,"count":1,"styleColumn":"manual","linkName":"System 14_System 6"} ]}}};
+</script>	
+	</script>
+	<!-- / javascript -->
+	
+<p>Hello!</p>
+</body>
+</html>
